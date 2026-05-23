@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Masa Listesi</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    .card {
+      background: white;
+      margin-top: 12px;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .masa-title {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .item {
+      padding: 4px 0;
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>📋 Masa Listesi</h2>
+
+    <input type="text" id="search" placeholder="Masa veya isim ara..." />
+
+    <div id="list"></div>
+  </div>
+
+<script>
+const DATA = {
+  "Arkadas Masasi": ["Hilal Gecgel,2","Gözde Baskan ve Osman Marangoz ve Damla Baskan,3","Tuğçe Anilgan ve Ufuk Kaptan,2","Sema Gokkaya ve Emre Deke,2","Nursen Yuksel ve Erkan Aydemir,2","Meyrem Ozkaynak,2","Emine Türkeli,2","Ege ve Simla,2","Kadir Umut,1","Ezel ve Fatih,2","Bulut Yaylim,1","Fevzihan Kiris,1","Yağmur Demircioğlu ve Tamer Yilmaz,2","Enes ve Seyma Solak,2","Kerem Yardim,1","Unburak Oznur,1","Ozan,2","Mustafa Tokay,1","Eren Metin,1","Serpil Tastekin,1","Melis Ayaz ve Emre Sencan,2"],
+  "Masa 1": ["Mustafa Genc ve esi,2","Ozcan Ozkan ve esi,2","Hulya/Hadi Cantemur,2","Nurviye/Engin Ozdemir,2","Nurettin Celebiler ve esi,2"],
+  "Masa 2": ["Nurcihan Gumus ,1","Bilge Aslantas,1","Hayriye/Tarik ve Bersu Oral ,3","Rakiye Taskiran ve esi,2","Elife Gomec,1","Fatos Kaya,1"],
+  "Masa 3": ["Turkan/Ali/Kemal Sertgoz,3","Eda/Ercan/Elif Ecem/Ikra Naz Yasar,4","Meryem/Ali Cetin,2"],
+  "Masa 4": ["Ayse/Vahdet Agrali,2","Fatos/Aydin Ozbas,2","Kibar Uslu,1","Kiymet Kilinc ve esi,2","Yeliz Ecin,1","Sengul Kaya,1","Havva Sanli,1"],
+  "Masa 5": ["Gonul/Ali Ihsan Erdag,2","Zehra/Murat Demiroren,2","Arzu Isceli ve Oglu,2","Seyma/Sukru Elbir ve iki cocuk,4"],
+  "Masa 6": ["Muhtereme/Musteba Ozdemir ,2","Dilara/Utku Ozdemir,2","Gul/Sadan Ozdemir,2","Sevim Satirer,1","Nur Satirer,1","Sule/Mustafa Keser ,2"],
+  "Masa 7": ["Meral/Rifat/Ege Batir,3","Mehlika/Omer Yilmaz ve 2 cocuk,4","Nazik/Muhterem Satirer ,2"],
+  "Masa 8": ["Ismail Ozdemir ve esi ve 3 cocuk ,5","Dervis/Inci/Kerem Ozdemir ve yegeni,4","Fatma/Demir Cengel,2"],
+  "Masa 9": ["Arife Uslu ve esi ,2","Rukiye Tuncer ,1","Asiye Gungormus,1","Betul Ugurlu,1","Fatma Tugba Cetin esi ve cocugu,3","Alican Akcalioglu ve esi,2"],
+  "Masa 10": ["Emel/Hasan Yavrucuoglu,2","Pinar Celik ,1","Ayse/Hasan Atalay ,2","Maver/Kenan Hondi,2","Akgun/Bektas Ozdemir,2"],
+  "Masa 11": ["Donay/Tamer Kuyucu,2","Duygu/Ali Emre Gezgin ve 2 cocuk,4","Ilkay Kocaakca,1","Duygu Caliskan,1","Serpil Yildirim ve kizi,2","Merve Erdinc,1"],
+  "Masa 12": ["Bedia/Cemal Ozdemir,2","Huseyin/Ogan Eminoglu,2","Metin/Niko Ozdemir,2","Gulay/Selman Saka ,2","Meryem/Hatun Ozdemir,2"],
+  "Masa 13": ["Pinar/Ali Kasapoglu,2","Sultan/Mehmet Ozgen,2","Esma/Kutlay Gokce,2","Asuman Caylar ,1","Zerrin Sozen,1","Busra Yildirim,1","Seref Cinar,1","Avni Cengiz,1"],
+  "Masa 14": ["Serap/Sila/Mehmet Adar,1","Emel/Kutlu Kolukisa ,2","Asli Topcuoglu ,1","Duygu Sezer,1","Eda Kurt,1","Deniz Bulut ,1","Merve Yuksel ,1"],
+  "Masa 15": ["Fatma/Ozkan Menges,2","Ayse/Sedat Ulu,2","Meral/Yakup Alpagut,2","Ayla Yuceturk,1","Mesune Yaylali,1","Sukruye Batir,1","Dilaver Cekic ve esi,2"],
+  "Masa 16": ["Ertugrul Keskin ve esi,2","Ercan Zohre ve esi,2","Kenan Satir ve esi,2","Demet/Aytekin Celen,2","Nazif Aric ve esi  ,2","Cenk Tunc,1"],
+  "Masa 21": ["Ayse - Ali Gorgulu","Adnan Cintas","Yakup - Hatice Kiris","Muhammer Kiris","Murat - Oznur Kiris"],
+  "Masa 22": ["Serdar - Oylum Cingoz","Fatma Tasdemir ve Esi","Saduman Safak ve Esi"],
+  "Masa 23": ["Ayse - Muhammer Kodal","Sule - Ahmet Cirakli","Ayse - Garip Ucak","Mehmet - Zehra Karakaya","Esma Ugur"],
+  "Masa 24": ["Dilek - Hakki Develi","Rona Hanim ve esi","Sukran - Cevdet Ural"],
+  "Masa 25": ["Melike - Mevlut Kirmizi","Nuray - Hakki Guntas","Fatma - Seref Kaba","Aliriza - Mazlume Vural"],
+  "Masa 26": ["Adem - Hale Gokbelen","Kerim - Fatma Yildirim","Suayip - Esra Yesil","Huseyin - Zeynep Dokuz"],
+  "Masa 27": ["Mehmet - Teslime Karagoz","Mustafa - Pinar Karagoz","Ayse Aras","Neriman - Muhammet Kiris"],
+  "Masa 28": ["Seher - Zeki Bekiroglu","Bedia - Mustafa Cekic","Hatice - Aydeniz Ozdemir","Derya - Mustafa Bas","Fatma Ozkaynak"],
+  "Masa 29": ["Zeliha - Ahmet Yavuz","Havva - Asuman Kiris","Kamile - Hayrettin - Tugba Aslan","Ragip Guzel"],
+  "Masa 30": ["Kemal - Sabriye Uysal","Suzan Hanim ve esi","Turan - Sevay Aktas","Lale Turan Aktas"],
+  "Masa 31": ["Musa - Perihan Kaplan","Havva - Mehmet Kiris","Ceren - Cengiz Kiris","Filiz Kaderoglu","Canan Seker","Necati - Dursune Vural"],
+  "Masa 32": ["Gunay Sigorta","Mehmet - Ayse Yildirim","Aysel Kiris ve Kizi","Rasim - Sevim Kiris","Mukadder Kiris"],
+  "Masa 33": ["Murat - Neslihan Kiris","Huseyin - Esra Kiris","Ayse - Burcu Kiris","Nimet Yalciner ve esi","Pinar Yalciner ve esi"],
+  "Masa 34": ["Dilek - Sevket Ozkan","Fatma - Suleyman Ozkan","Emine - Mehmet Ali Tekin","Esma Ozkan","Faruk Karagedik","Abdullah Yildirim ve esi"],
+  "Masa 35": ["Sedat - Ayla Gurcan","Cuneyt Coskun ve Esi","Ismail Tutar - Esi - Oglu","Ilhan Kapu","Huseyin Kir","Huzur Sigorta"],
+  "Masa 37": ["Mehmet - Ummani Cintas","Ferit - Alona - Katya Kesen","Turgay Cintas ve esi","Kamil - Senay - Cemile - Nadir Cintas"],
+  "Masa 38": ["Ayse - Sukriye Demir","Emine - Ali Saglamel","Gulay - Hande - Hazal - Hasan Tural","Sergen Sonmez","Asli - Furkan Arican"],
+  "Masa 39": ["Sukru - Ayse Kiris","Nurgul - Nuran Say","Neslihan - Zafer Durusoy","Cansen Karadag","Yasemin Kocak","Esref - Gulbahar Cintas"],
+  "Masa 41": ["Sezai - Cigdem - Zehra - Zeynep Sanli","Mehmet - Burcu Arikan","Erdal - Deniz Cintas","Ebru","Ayse - Gulay Cintas"],
+  "Masa 42": ["Turgay - Asli Kirbas","Ayse - Mustafa Koc","Gulay - Sefik Demirci","Ertugrul - Emine Kiris","Nafiye - Durali Celik"],
+  "Masa 43": ["Aynur - Mehmet Kiris","Naime - Fatih - Esra Kalan","Sidika - Yasin Yun","Birsen - Hasan - Galip - Merve Guler"],
+  "Masa 44": ["Hulya - Bulent - Elif - Mustafa Sanli","Izel - Utku Ergin","Birgul - Fikret Ergin","Sinan - Meryem Erdogan"],
+  "Masa 45": ["Huseyin - Fatma Sanli","Nejdet - Gamze Sanli","Zeliha Sanli","Ozlem - Mahmut Tonget","Hatice Sanli","Kerim Celik","Eren Gurkan"],
+  "Masa 46": ["Tuncer - Mine - Hasan Muftuoglu","Muzeyyen - Samet Avci","Miray - Hilmi Tikmak","Ahmet - Seda Cavusoglu","Ayse Herek"],
+  "Masa 47": ["Aysegul - Hasan - Mehmet Kaplan","Misra Aydin","Yagmur - Taner Yilmaz","Mumin - Emine Yildirim","Huseyin - Atiye Yildirim"],
+  "Masa 48": ["Fatma Yikilmaz","Nuran - Mehmet - Sevgi - Ismail - Eylul Demirel","Omer - Kiymet Elci","Asli - Ilhan Yenihan"],
+  "Masa 49": ["Recep - Naile - Mehmet Kiris","Ali - Besime Kiris","Recep - Adalet Kiris","Mehmet Bulut ve esi"],
+  "Masa 50": ["Baattin - Sevim Inal","Saliha Inal","Selda - Huseyin Hoyuncu","Ismail - Durdane - Fatma - Ayse Oz"],
+  "Masa 51": ["Meral Dokmeci","Sebiha Cansu","Ibrahim Yuksel","Gulhan Atalay"],
+  "Masa 52": ["Ahmet - Altug - Tugce - Ayse Karagedik","Umran Karagedik","Ummu - Elif - Emine Ceran","Eda - Alper Yilmaz"]
+};
+
+// ---- SORT MASA KEYS ASC ----
+function sortData(data) {
+  return Object.keys(data)
+    .sort((a, b) => {
+      const na = parseInt(a.replace(/\D/g, ""));
+      const nb = parseInt(b.replace(/\D/g, ""));
+      return na - nb;
+    })
+    .reduce((acc, key) => {
+      acc[key] = data[key];
+      return acc;
+    }, {});
+}
+
+const DATA_SORTED = sortData(DATA);
+
+function render(filter = "") {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  Object.entries(DATA_SORTED).forEach(([masa, items]) => {
+    const m = masa.toLowerCase();
+    const f = filter.toLowerCase();
+
+    const matchMasa = m.includes(f);
+    const filteredItems = items.filter(i => i.toLowerCase().includes(f));
+
+    if (!matchMasa && filteredItems.length === 0) return;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("div");
+    title.className = "masa-title";
+    title.textContent = masa;
+
+    card.appendChild(title);
+
+    const showItems = matchMasa ? items : filteredItems;
+
+    showItems.forEach(i => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.textContent = i;
+      card.appendChild(div);
+    });
+
+    list.appendChild(card);
+  });
+}
+
+document.getElementById("search").addEventListener("input", (e) => {
+  render(e.target.value);
+});
+
+render();
+</script>
+</body>
+</html>
